@@ -390,7 +390,7 @@ class AntHelper {
           'minHeight': '480',
           'minFrameRate': '30',
         },
-        'facingMode': 'user',
+        'facingMode': 'environment',
         'optional': [],
       },
     };
