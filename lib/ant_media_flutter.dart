@@ -65,69 +65,75 @@ class AntMediaFlutter {
 
   // connect is the entry point for the plugin
   // it is used to connect to the Ant Media Server
-  static void connect(
-      String ip,
-      String streamId,
-      String streamName,
-      String roomId,
-      String token,
-      AntMediaType type,
-      bool userScreen,
-      HelperStateCallback onStateChange,
-      StreamStateCallback onLocalStream,
-      StreamStateCallback onAddRemoteStream,
-      DataChannelCallback onDataChannel,
-      DataChannelMessageCallback onDataChannelMessage,
-      ConferenceUpdateCallback onupdateConferencePerson,
-      StreamStateCallback onRemoveRemoteStream,
-      List<Map<String, String>> iceServers,
-      Callbacks callbacks) async {
+  static void connect({
+    required String ip,
+    required String streamId,
+    required String streamName,
+    required String roomId,
+    required InitialCamera initialCamera,
+    required String token,
+    required AntMediaType type,
+    required bool userScreen,
+    required HelperStateCallback onStateChange,
+    required StreamStateCallback onLocalStream,
+    required StreamStateCallback onAddRemoteStream,
+    required DataChannelCallback onDataChannel,
+    required DataChannelMessageCallback onDataChannelMessage,
+    required ConferenceUpdateCallback onupdateConferencePerson,
+    required StreamStateCallback onRemoveRemoteStream,
+    required List<Map<String, String>> iceServers,
+    required Callbacks callbacks,
+  }) async {
     anthelper = null;
     anthelper ??= AntHelper(
       //host
-      ip,
+      host: ip,
 
       //streamID
-      streamId,
+      streamId: streamId,
 
       //Stream name
-      streamName,
+      streamName: streamName,
+
+      initialCamera: initialCamera,
 
       //roomID
-      roomId,
+      roomId: roomId,
 
       //token
-      token,
+      token: token,
 
       //onStateChange
-      onStateChange,
+      onStateChange: onStateChange,
 
       //onAddRemoteStream
-      onAddRemoteStream,
+      onAddRemoteStream: onAddRemoteStream,
 
       //onDataChannel
-      onDataChannel,
+      onDataChannel: onDataChannel,
 
       //onDataChannelMessage
-      onDataChannelMessage,
+      onDataChannelMessage: onDataChannelMessage,
 
       //onLocalStream
-      onLocalStream,
+      onLocalStream: onLocalStream,
 
       //onRemoveRemoteStream
-      onRemoveRemoteStream,
+      onRemoveRemoteStream: onRemoveRemoteStream,
 
       //ScreenSharing
-      userScreen,
+      userScreen: userScreen,
 
       // onupdateConferencePerson
-      onupdateConferencePerson,
+      onupdateConferencePerson: onupdateConferencePerson,
 
       //iceServers
-      iceServers,
+      iceServers: iceServers,
 
       //callbacks
-      callbacks,
+      callbacks: callbacks,
     )..connect(type);
   }
 }
+
+enum InitialCamera { front, rear }

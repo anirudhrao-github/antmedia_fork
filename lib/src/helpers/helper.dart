@@ -28,6 +28,7 @@ class AntHelper {
   final String _token;
   final String _host;
   final String streamName;
+  final InitialCamera initialCamera;
 
   // Max video and audio bitrate in kbps. Default: Unlimited
   int maxVideoBitrate = -1;
@@ -43,23 +44,27 @@ class AntHelper {
   final Map<String, dynamic> allParticipants = {};
 
   // Constructor for AntHelper
-  AntHelper(
-    this._host,
-    this._streamId,
-    this.streamName,
-    this._roomId,
-    this._token,
-    this.onStateChange,
-    this.onAddRemoteStream,
-    this.onDataChannel,
-    this.onDataChannelMessage,
-    this.onLocalStream,
-    this.onRemoveRemoteStream,
-    this.userScreen,
-    this.onupdateConferencePerson,
-    this.iceServers,
-    this.callbacks,
-  ) {
+  AntHelper({
+    required String host,
+    required String streamId,
+    required this.streamName,
+    required String roomId,
+    required String token,
+    required this.initialCamera,
+    required this.onStateChange,
+    required this.onAddRemoteStream,
+    required this.onDataChannel,
+    required this.onDataChannelMessage,
+    required this.onLocalStream,
+    required this.onRemoveRemoteStream,
+    required this.userScreen,
+    required this.onupdateConferencePerson,
+    required this.iceServers,
+    required this.callbacks,
+  })  : _host = host,
+        _streamId = streamId,
+        _roomId = roomId,
+        _token = token {
     final config = {
       "sdpSemantics": "unified-plan",
       'iceServers': iceServers,
@@ -390,7 +395,8 @@ class AntHelper {
           'minHeight': '480',
           'minFrameRate': '30',
         },
-        'facingMode': 'environment',
+        'facingMode':
+            initialCamera == InitialCamera.front ? 'user' : 'environment',
         'optional': [],
       },
     };
