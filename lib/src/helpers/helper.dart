@@ -422,6 +422,8 @@ class AntHelper {
         _type == AntMediaType.Peer ||
         _type == AntMediaType.Conference ||
         _type == AntMediaType.Default) {
+      _localStream?.dispose();
+      _localStream = null;
       if (media != 'data' && _localStream == null) {
         _localStream = await createStream(media, userScreen);
         _remoteStreams.add(_localStream!);
@@ -550,8 +552,8 @@ class AntHelper {
   void closePeerConnection(String streamId) {
     print('bye: $streamId');
     if (_mute) muteMic(false);
-    _localStream?.dispose();
-    _localStream = null;
+    // _localStream?.dispose();
+    // _localStream = null;
     final pc = _peerConnections.remove(streamId);
     pc?.close();
     _dataChannel?.close();
