@@ -128,7 +128,16 @@ class AntHelper {
       final audioTrack = _localStream!
           .getAudioTracks()
           .firstWhere((track) => track.kind == 'audio');
-      Helper.setMicrophoneMute(mute, audioTrack);
+      await Helper.setMicrophoneMute(mute, audioTrack);
+    }
+  }
+
+  // Mute or unmute the local stream
+  Future<void> enableSpeaker(bool enable, MediaStream track) async {
+    final audioTracks = track.getAudioTracks();
+    print('Audio tracks: ${audioTracks.length}');
+    for (final t in audioTracks) {
+      t.enableSpeakerphone(enable);
     }
   }
 
