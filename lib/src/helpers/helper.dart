@@ -128,7 +128,8 @@ class AntHelper {
       final audioTrack = _localStream!
           .getAudioTracks()
           .firstWhere((track) => track.kind == 'audio');
-      Helper.setMicrophoneMute(mute, audioTrack);
+      audioTrack.enabled = false;
+      // Helper.setMicrophoneMute(mute, audioTrack);
     }
   }
 
