@@ -400,8 +400,10 @@ class AntHelper {
       'audio': true,
       'video': {
         'mandatory': {
-          'minWidth': '640',
-          'minHeight': '480',
+          // 'minWidth': '640',
+          // 'minHeight': '480',
+          'minWidth': '1920',
+          'minHeight': '1080',
           'minFrameRate': '30',
         },
         'facingMode':
