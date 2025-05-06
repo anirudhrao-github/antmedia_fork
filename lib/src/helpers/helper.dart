@@ -402,8 +402,8 @@ class AntHelper {
         'mandatory': {
           // 'minWidth': '640',
           // 'minHeight': '480',
-          'minWidth': '1920',
-          'minHeight': '1080',
+          'minWidth': '3840',
+          'minHeight': '2160',
           'minFrameRate': '30',
         },
         'facingMode':
