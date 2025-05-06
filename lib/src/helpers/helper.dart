@@ -415,7 +415,7 @@ class AntHelper {
     final stream = userScreen
         ? await navigator.mediaDevices.getDisplayMedia(mediaConstraints)
         : await navigator.mediaDevices.getUserMedia({
-  video: { 'width': 1280, 'height': 720 }
+  'video': { 'width': 1280, 'height': 720 }
 });
     onLocalStream(stream);
     return stream;
