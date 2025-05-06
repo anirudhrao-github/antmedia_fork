@@ -133,6 +133,7 @@ class AntMediaFlutter {
       //callbacks
       callbacks: callbacks,
     )..connect(type);
+    antHelper.setMaxVideoBitrate(3000000);
   }
 }
 
