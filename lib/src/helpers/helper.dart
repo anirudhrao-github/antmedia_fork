@@ -1,4 +1,4 @@
-// ignore_for_file: non_constant_identifier_names, unnecessary_this, curly_braces_in_flow_control_structures, unnecessary_new, avoid_print, prefer_const_constructors, constant_identifier_names, prefer_collection_literals, prefer_generic_function_type_aliases, prefer_final_fields, unnecessary_string_interpolations, prefer_interpolation_to_compose_strings
+// ignore_for_file: unused_element non_constant_identifier_names, unnecessary_this, curly_braces_in_flow_control_structures, unnecessary_new, avoid_print, prefer_const_constructors, constant_identifier_names, prefer_collection_literals, prefer_generic_function_type_aliases, prefer_final_fields, unnecessary_string_interpolations, prefer_interpolation_to_compose_strings
 
 import 'dart:async';
 import 'dart:convert';
@@ -29,6 +29,7 @@ class AntHelper {
   final String _host;
   final String streamName;
   final InitialCamera initialCamera;
+  final bool _autoStart;
 
   // Max video and audio bitrate in kbps. Default: Unlimited
   int maxVideoBitrate = -1;
@@ -45,6 +46,7 @@ class AntHelper {
 
   // Constructor for AntHelper
   AntHelper({
+    required bool autoStart,
     required String host,
     required String streamId,
     required this.streamName,
@@ -64,6 +66,7 @@ class AntHelper {
   })  : _host = host,
         _streamId = streamId,
         _roomId = roomId,
+        _autoStart = autoStart,
         _token = token {
     final config = {
       "sdpSemantics": "unified-plan",
@@ -338,6 +341,7 @@ class AntHelper {
         print("$command $mapData");
         break;
     }
+    callbacks(command, mapData);
   }
 
   Future<void> connect(AntMediaType type) async {
@@ -353,17 +357,64 @@ class AntHelper {
       print('onOpen');
       onStateChange(HelperState.ConnectionOpen);
 
-      if (_type == AntMediaType.Publish ||
-          _type == AntMediaType.DataChannelOnly) {
-        publish(_streamId, _token, "", "", streamName, "", "");
-      } else if (_type == AntMediaType.Conference) {
-        publish(_streamId, _token, "", "", streamName, _roomId, "");
-        play(_roomId, _token, _roomId, [], "", "", "");
-      } else if (_type == AntMediaType.Play) {
-        play(_streamId, _token, "", [], "", "", "");
-      } else if (_type == AntMediaType.Peer) {
-        join(_streamId);
+      if (_autoStart) {
+        if (_type == AntMediaType.Publish) {
+          publish(
+              _streamId,
+              _token,
+              "",
+              "",
+              _streamId,
+              "",
+              "");
+        } else if (_type == AntMediaType.DataChannelOnly) {
+          publish(
+              _streamId,
+              _token,
+              "",
+              "",
+              _streamId,
+              "",
+              "");
+          play(
+              _streamId,
+              _token,
+              "",
+              [],
+              "",
+              "",
+              "");
+        } else if (_type == AntMediaType.Conference) {
+          publish(
+              _streamId,
+              _token,
+              "",
+              "",
+              _streamId,
+              _roomId,
+              "");
+          play(
+              _roomId,
+              _token,
+              _roomId,
+              [],
+              "",
+              "",
+              "");
+        } else if (_type == AntMediaType.Play) {
+          play(
+              _streamId,
+              _token,
+              "",
+              [],
+              "",
+              "",
+              "");
+        } else if (_type == AntMediaType.Peer) {
+          join(_streamId);
+        }
       }
+
       _ping = Timer.periodic(Duration(seconds: 5), (timer) {
         final ping_msg = {'command': 'ping'};
         _sendAntMedia(ping_msg);
@@ -520,6 +571,7 @@ class AntHelper {
     }
   }
 
+
   Future<void> _createAnswerAntMedia(
     String id,
     RTCPeerConnection pc,
@@ -625,7 +677,13 @@ class AntHelper {
     };
     _sendAntMedia(request);
   }
-
+  void getStreamInfo(String streamId){
+    final request = {
+      'command': 'getStreamInfo',
+      'streamId': streamId,
+    };
+    _sendAntMedia(request);
+  }
   // Force stream into a specific quality
   void forceStreamQuality(String streamId, int resolution) {
     final request = {

@@ -1,6 +1,7 @@
 // ignore_for_file: must_be_immutable, avoid_print
 
 import 'dart:core';
+import 'dart:math';
 
 import 'package:ant_media_flutter/ant_media_flutter.dart';
 import 'package:flutter/material.dart';
@@ -25,8 +26,12 @@ class Play extends StatefulWidget {
 class _PlayState extends State<Play> {
   final RTCVideoRenderer _localRenderer = RTCVideoRenderer();
   final RTCVideoRenderer _remoteRenderer = RTCVideoRenderer();
-  List<String> abrList = ['Automatic'];
+  List<String> abrList = [];
+  String _currentAbr = 'Automatic';
+
   bool _inCalling = false;
+  bool _isPaused = false;
+  bool _isFullScreen = false;
 
   _PlayState();
 
@@ -85,7 +90,8 @@ class _PlayState extends State<Play> {
                 _localRenderer.srcObject = null;
                 _remoteRenderer.srcObject = null;
                 _inCalling = false;
-                Navigator.pop(context);
+                _isPaused ? _isPaused : Navigator.pop(context);
+                // Navigator.pop(context);
               });
               break;
             case HelperState.ConnectionOpen:
@@ -139,12 +145,22 @@ class _PlayState extends State<Play> {
         }),
         widget.iceServers,
         (command, mapData) {
-          abrList = ['Automatic'];
-          if (command == 'streamInformation') {
+          if (command == 'notification') {
+            if(mapData["definition"] == "play_started"){
+              setState(() {
+                _inCalling = true;
+              });
+              AntMediaFlutter.anthelper?.getStreamInfo(widget.id);
+            }
+          }
+          else if (command == 'streamInformation') {
+            abrList = ['Automatic'];
             print(mapData['streamInfo']);
+            mapData['streamInfo'].forEach((abrSetting) =>
+            {abrList.add(abrSetting['streamHeight'].toString())});
+
             setState(() {
-              mapData['streamInfo'].forEach((abrSetting) =>
-                  {abrList.add(abrSetting['streamHeight'].toString())});
+              abrList;
             });
           }
         });
@@ -172,8 +188,8 @@ class _PlayState extends State<Play> {
                         heroTag: "btn2",
                         onPressed: _hangUp,
                         tooltip: 'Hangup',
-                        child: const Icon(Icons.call_end),
                         backgroundColor: Colors.pink,
+                        child: const Icon(Icons.call_end),
                       ),
                       DropdownButton<String>(
                         items: abrList.map((String value) {
@@ -183,28 +199,72 @@ class _PlayState extends State<Play> {
                           );
                         }).toList(),
                         onChanged: (streamHeight) {
-                          if (streamHeight == 'Automatic') streamHeight = '0';
+                          if (streamHeight == 'Automatic')
+                            streamHeight = '0';
                           AntMediaFlutter.anthelper?.forceStreamQuality(
                               widget.id, int?.parse(streamHeight.toString()));
+                          setState(() {
+                            _currentAbr = (streamHeight == '0' ? 'Automatic' : streamHeight)!;
+                          });
                         },
+                        value: _currentAbr,
                       )
                     ]))
             : null,
-        body: OrientationBuilder(builder: (context, orientation) {
-          return Stack(children: <Widget>[
-            Positioned(
-                left: 0.0,
-                right: 0.0,
-                top: 0.0,
-                bottom: 0.0,
-                child: Container(
+        body: OrientationBuilder(
+          builder: (context, orientation) {
+            return Stack(
+              children: <Widget>[
+                _isFullScreen ? Container(
                   margin: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 0.0),
                   width: MediaQuery.of(context).size.width,
                   height: MediaQuery.of(context).size.height,
-                  child: RTCVideoView(_remoteRenderer),
                   decoration: const BoxDecoration(color: Colors.black54),
-                )),
-          ]);
-        }));
+                  child: RTCVideoView(_remoteRenderer,objectFit: orientation == Orientation.portrait ? RTCVideoViewObjectFit.RTCVideoViewObjectFitContain : RTCVideoViewObjectFit.RTCVideoViewObjectFitCover ),
+                ) : Container(
+                  margin: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 0.0),
+                  width: MediaQuery.of(context).size.width,
+                  height: MediaQuery.of(context).size.height,
+                  decoration: const BoxDecoration(color: Colors.black54),
+                  child: RTCVideoView(_remoteRenderer),
+                ),
+                _isPaused
+                    ? Center(
+                  child: FloatingActionButton(
+                    heroTag: "btn3",
+                    onPressed: () {
+                      setState(() {
+                        _isPaused = false;
+                      });
+                      _connect();
+                    },
+                    tooltip: 'Play',
+                    backgroundColor: Colors.grey.withOpacity(0.6),
+                    child: const Icon(Icons.play_arrow),
+                  ),
+                )
+                    : GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _isPaused = true;
+                    });
+                    _hangUp();
+                  },
+                  child: Container(
+                    color: Colors.transparent, // Makes the entire screen tappable
+                    width: MediaQuery.of(context).size.width,
+                    height: MediaQuery.of(context).size.height,
+                    alignment: Alignment.center,
+                    child: const Icon(
+                      Icons.pause,
+                      color: Colors.transparent, // Keeps the icon invisible
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        )
+    );
   }
 }

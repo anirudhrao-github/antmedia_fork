@@ -55,12 +55,28 @@ class AntMediaFlutter {
     const androidConfig = FlutterBackgroundAndroidConfig(
       notificationTitle: 'Title of the notification',
       notificationText: 'Text of the notification',
-      notificationImportance: AndroidNotificationImportance.Default,
       notificationIcon:
           AndroidResource(name: 'background_icon', defType: 'drawable'),
     );
-    await FlutterBackground.initialize(androidConfig: androidConfig);
-    return FlutterBackground.enableBackgroundExecution();
+    try {
+      await FlutterBackground.initialize(androidConfig: androidConfig);
+      try {
+        await FlutterBackground.enableBackgroundExecution();
+      } catch (e) {}
+
+      bool initialized =
+          await FlutterBackground.initialize(androidConfig: androidConfig);
+      if (initialized) {
+        await FlutterBackground.enableBackgroundExecution();
+        return true;
+      } else {
+        print('Error: FlutterBackground not initialized');
+        return false;
+      }
+    } catch (e) {
+      print('Error initializing FlutterBackground: $e');
+      return false;
+    }
   }
 
   // connect is the entry point for the plugin
@@ -86,6 +102,81 @@ class AntMediaFlutter {
   }) async {
     anthelper = null;
     anthelper ??= AntHelper(
+      // automatically start the service
+      autoStart: true,
+
+      //host
+      host: ip,
+
+      //streamID
+      streamId: streamId,
+
+      //roomID
+      roomId: roomId,
+
+      //token
+      token: token,
+
+      //onStateChange
+      onStateChange: onStateChange,
+
+      //onAddRemoteStream
+      onAddRemoteStream: onAddRemoteStream,
+
+      //onDataChannel
+      onDataChannel: onDataChannel,
+
+      //onDataChannelMessage
+      onDataChannelMessage: onDataChannelMessage,
+
+      //onLocalStream
+      onLocalStream: onLocalStream,
+
+      //onRemoveRemoteStream
+      onRemoveRemoteStream: onRemoveRemoteStream,
+
+      //ScreenSharing
+      userScreen: userScreen,
+
+      // onupdateConferencePerson
+      onupdateConferencePerson: onupdateConferencePerson,
+
+      //iceServers
+      iceServers: iceServers,
+
+      //callbacks
+      callbacks: callbacks,
+
+      streamName: streamName,
+
+      initialCamera: initialCamera,
+    )..connect(type);
+  }
+
+  // prepare is the entry point for the plugin
+  static void prepare(
+      String ip,
+      String streamId,
+      String roomId,
+      String token,
+      String streamName,
+      InitialCamera initialCamera,
+      AntMediaType type,
+      bool userScreen,
+      HelperStateCallback onStateChange,
+      StreamStateCallback onLocalStream,
+      StreamStateCallback onAddRemoteStream,
+      DataChannelCallback onDataChannel,
+      DataChannelMessageCallback onDataChannelMessage,
+      ConferenceUpdateCallback onupdateConferencePerson,
+      StreamStateCallback onRemoveRemoteStream,
+      List<Map<String, String>> iceServers,
+      Callbacks callbacks) async {
+    anthelper = null;
+    anthelper ??= AntHelper(
+      // automatically start the service
+      autoStart: false,
+
       //host
       host: ip,
 
